@@ -31,7 +31,7 @@ class MinimalPublisher(Node):
 
     def timer_callback(self):
         try:
-            file_path = "/home/rsx-science/rover_ws/src/science/science/hi.txt"
+            file_path = "/home/rsx-science/rover_ws/src/rsx-science/science/hi.txt"
             myfile = open (file_path, 'r')
             myfile.close()
             # file_found = True
@@ -42,7 +42,6 @@ class MinimalPublisher(Node):
             msg.data = 'txt NOT found'
             self.publisher_.publish(msg)
             self.get_logger().info('Publishing: "%s"' % msg.data)
-            self.i += 1
 
         else:
             # def timer_callback(self):
@@ -50,7 +49,6 @@ class MinimalPublisher(Node):
             msg.data = 'txt found'
             self.publisher_.publish(msg)
             self.get_logger().info('Publishing: "%s"' % msg.data)
-            self.i += 1
 
 
 def main(args=None):
