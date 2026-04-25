@@ -16,12 +16,14 @@ import can
 from CAN_utilities import *
 
 # Types of modules
-SCI_MODULE_NONE = 0 # No type
-SCI_MODULE_RPI = 1 # Raspberry Pi 5
-SCI_MODULE_GENERAL = 2 # Arduino Nano
-SCI_MODULE_OPTICS = 3 # Arduino Nano
-SCI_MODULE_DRILL = 4 # Arduino Nano
-SCI_MODULE_MOTOR = 5 # Arduino Nano
+SCI_MODULE_NONE             = 0 # No type
+SCI_MODULE_RPI              = 1 # Raspberry Pi 5
+SCI_MODULE_GENERAL          = 2 # Arduino Nano
+SCI_MODULE_OPTICS           = 3 # Arduino Nano
+SCI_MODULE_DRILL            = 4 # Arduino Nano
+SCI_MODULE_MOTOR            = 5 # Arduino Nano
+SCI_MODULE_MULTISPECTRAL    = 6 # Arduino Nano
+SCI_MODULE_SORTER           = 7 # Arduino Nano
 
 # Types of Peripherals
 SCI_PERIPHERAL_NONE = 0
@@ -32,7 +34,6 @@ SCI_PERIPHERAL_LINEAR_ACTUATOR = 4
 SCI_PERIPHERAL_ULTRASONIC = 5
 SCI_PERIPHERAL_ELECTROMAGNET = 6
 SCI_PERIPHERAL_SPARK_MOTOR = 7
-SCI_PERIPHERAL_MULTISPECTRAL = 8
 
 # Types of errors
 SCI_ERROR_SUCCESS = 0 # No Error

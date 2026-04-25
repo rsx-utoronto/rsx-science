@@ -16,7 +16,7 @@ find_package(ament_cmake REQUIRED)
 # find_package(rclcpp REQUIRED)   # Not needed if there are no cpp nodes
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
-# find_package(sensor_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 # find_package(geometry_msgs REQUIRED)
 # find_package(visualization_msgs REQUIRED)
 # find_package(tf2_ros REQUIRED)
@@ -79,7 +79,7 @@ install(PROGRAMS
 ament_export_dependencies(
   std_msgs
   rosidl_default_runtime # Allows python to import custom messages
-#   sensor_msgs
+  sensor_msgs
 #   geometry_msgs
 #   visualization_msgs
 )

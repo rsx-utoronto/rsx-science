@@ -17,6 +17,7 @@
 import rclpy
 from rclpy.node import Node
 import science_can as sc
+import numpy as np
 
 from science.msg import Science
 
@@ -37,8 +38,9 @@ class GUITest(Node):
             "science_state", 
             10
         )
+        self.test = True
         timer_period = 0.5
-        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.timer = self.create_timer(timer_period, self.timer_callback, autostart= True)
 
     def listener_callback(self, msg : Science):
 
@@ -47,8 +49,10 @@ class GUITest(Node):
         # can_message.print_pkt()
         
         # Check which module is the message for
-        if "rpi" == msg.receiver:
+        if "rsx" == msg.receiver:
             return
+
+        # self.get_logger().info('I heard you >:)')
 
         sci_pkt = sc.ScienceCanPacket()
 
@@ -70,6 +74,19 @@ class GUITest(Node):
             
             elif "off" == msg.command:
                 sci_pkt.data = None #TODO
+
+            if "spectrometer" == msg.peripheral:
+                sci_pkt.receiver = "spectrometer" #TODO
+
+                if "start" == msg.command:
+                    # self.test = True
+                    # self.timer.reset()
+                    sci_pkt.data = None #TODO
+                
+                elif "stop" == msg.command:
+                    # self.test = False
+                    # self.timer.destroy()
+                    sci_pkt.data = None #TODO
 
         # Handling drill module specific commands
         elif "drill" == msg.receiver:
@@ -93,11 +110,18 @@ class GUITest(Node):
 
         # Handling multispectral module specific commands
         elif "multispectral" == msg.receiver:
-            sci_pkt.receiver = sc.SCI_MODULE_GENERAL
+            sci_pkt.receiver = sc.SCI_MODULE_MULTISPECTRAL
+
+            if "collect_13" == msg.command:
+                sci_pkt.data = None #TODO
+            
+            elif "collect_single" == msg.command:
+                sci_pkt.data = None #TODO
+
 
         # Handling sorter module specific commands
         elif "sorter" == msg.receiver:
-            sci_pkt.receiver = sc.SCI_MODULE_MOTOR
+            sci_pkt.receiver = sc.SCI_MODULE_SORTER
 
         else:
             self.get_logger().info('ERROR: Invalid receiver')
@@ -109,7 +133,11 @@ class GUITest(Node):
 
             # Prepare CAN data packet for "servo" peripheral
             if "forward" == msg.command:
-                sci_pkt.data = None #TODO
+                sci_pkt.priority = 0 # 0 For high priority, 1 for low. Can be default and placed outside of if statements. 
+                sci_pkt.multipacket_id = 0 # 0 for single packet commands. Should only be another number for spectrometer data. Can also be default
+                sci_pkt.extra = 0 # No extra data to be sent with servo
+                sci_pkt.dlc = 8 # Full length of data 
+                sci_pkt.data = bytes([0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 1 for forward, -1 for backward. 
             
             elif "backward" == msg.command:
                 sci_pkt.data = None #TODO
@@ -126,13 +154,15 @@ class GUITest(Node):
 
     def timer_callback(self):
         msg = Science()
-        msg.receiver = "Pi"
-        # msg.peripheral = None
+        msg.receiver = "rsx"
+        msg.command = "temphum_data"
         # msg.command = None
-        # msg.data = None
-        # msg.response = None
+        test_array = np.random.rand(2)
+        msg.data = test_array
+        msg.response = "site_2"
         
-        self.publisher.publish(msg)
+        if self.test:
+            self.publisher.publish(msg)
 
         # print("Printing on topic")
     
