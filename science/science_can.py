@@ -222,7 +222,7 @@ def process_ROS_topic(ros_topic):
     # Fill with info from ros_topic
     # rsx_scp.priority = ros_topic.priority
 
-    if ros_topic.peripheral == SCI_PERIPHERAL_MULTISPECTRAL:
+    if ros_topic.peripheral == SCI_PERIPHERAL_SERVO:
         rsx_scp.multipacket_id = assign_available_slot() # Assign next available multipacket ID to request
     else:
         rsx_scp.multipacket_id = 0

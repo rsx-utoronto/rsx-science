@@ -44,7 +44,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   DEPENDENCIES
   std_msgs
-#   sensor_msgs
+  sensor_msgs
 #   geometry_msgs
 #   visualization_msgs
 )
