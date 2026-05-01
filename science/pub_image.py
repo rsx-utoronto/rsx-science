@@ -18,13 +18,14 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import String
+from science.msg import Science
 
 
 class MinimalPublisher(Node):
 
     def __init__(self):
         super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(String, 'txt', 10)
+        self.publisher_ = self.create_publisher(Science, 'science_state', 10)
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         # file_found = False
@@ -38,10 +39,10 @@ class MinimalPublisher(Node):
                 
         except FileNotFoundError:
             # def timer_callback(self):
-            msg = String()
-            msg.data = 'txt NOT found'
-            self.publisher_.publish(msg)
-            self.get_logger().info('Publishing: "%s"' % msg.data)
+            # msg = String()
+            err_msg = 'txt NOT found'
+            # self.publisher_.publish(msg)
+            self.get_logger().info('Publishing: "%s"' % err_msg)
 
         else:
             # def timer_callback(self):
@@ -49,6 +50,7 @@ class MinimalPublisher(Node):
             msg.data = 'txt found'
             self.publisher_.publish(msg)
             self.get_logger().info('Publishing: "%s"' % msg.data)
+
 
 
 def main(args=None):

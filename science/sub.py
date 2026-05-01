@@ -16,7 +16,7 @@
 
 import rclpy
 from rclpy.node import Node
-import science_can as sc
+import comms.science_can as sc
 
 from std_msgs.msg import String
 

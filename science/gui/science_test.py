@@ -16,7 +16,7 @@
 
 import rclpy
 from rclpy.node import Node
-import science_can as sc
+import science.comms.science_can as sc
 import numpy as np
 
 from science.msg import Science
@@ -41,6 +41,12 @@ class GUITest(Node):
         self.test = True
         timer_period = 0.5
         self.timer = self.create_timer(timer_period, self.timer_callback, autostart= True)
+
+        # # Instantiate CAN bus
+        # self.BUS = sc.initialize_bus()
+
+        # 
+        self.index = 0
 
     def listener_callback(self, msg : Science):
 
@@ -135,10 +141,14 @@ class GUITest(Node):
             if "forward" == msg.command:
                 sci_pkt.priority = 0 # 0 For high priority, 1 for low. Can be default and placed outside of if statements. 
                 sci_pkt.multipacket_id = 0 # 0 for single packet commands. Should only be another number for spectrometer data. Can also be default
-                sci_pkt.extra = 0 # No extra data to be sent with servo
+                sci_pkt.extra = sc.SCI_ERROR_SUCCESS # No extra data to be sent with servo
                 sci_pkt.dlc = 8 # Full length of data 
-                sci_pkt.data = bytes([0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 1 for forward, -1 for backward. 
-            
+                sci_pkt.data = bytes([(0x00 + self.index), 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 1 for forward, -1 for backward.
+                pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt=sci_pkt)
+                # task = self.BUS.send(pulse)
+                self.index += 1
+                self.index %= 20
+
             elif "backward" == msg.command:
                 sci_pkt.data = None #TODO
             
@@ -154,17 +164,39 @@ class GUITest(Node):
 
     def timer_callback(self):
         msg = Science()
-        msg.receiver = "rsx"
-        msg.command = "temphum_data"
-        # msg.command = None
-        test_array = np.random.rand(2)
-        msg.data = test_array
-        msg.response = "site_2"
+        msg.receiver = "drill"
+        msg.peripheral = "servo"
+        msg.command = "forward"
+        # test_array = np.random.rand(2)
+        # msg.data = test_array
+        # msg.response = "site_2"
         
         if self.test:
             self.publisher.publish(msg)
 
         # print("Printing on topic")
+    
+    def servo_spin_test(self):
+        # Example ScienceCanPacket to dissect
+        pulse_pkg = sc.ScienceCanPacket()
+
+        pulse_pkg.priority = 0
+        pulse_pkg.science = 0
+        pulse_pkg.sender = sc.SCI_MODULE_RPI
+        pulse_pkg.receiver = sc.SCI_MODULE_DRILL
+        pulse_pkg.peripheral = sc.SCI_PERIPHERAL_SERVO
+        pulse_pkg.extra = sc.SCI_ERROR_SUCCESS
+        pulse_pkg.dlc = 8
+        pulse_pkg.data = bytes([0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
+
+        pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt=pulse_pkg)
+
+        import time
+        while (True):
+            pulse_pkg.data = bytes([(pulse_pkg.data[0] + 1) % 18, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
+            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt=pulse_pkg)
+            task = sc.BUS.send(pulse)
+            time.sleep(1)
     
 
 def main(args=None):

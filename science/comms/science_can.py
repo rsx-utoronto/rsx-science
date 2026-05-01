@@ -13,7 +13,7 @@ import can
 # from rclpy.node import Node
 # from std_msgs.msg import String
 
-from CAN_utilities import *
+from comms.CAN_utilities import *
 
 # Types of modules
 SCI_MODULE_NONE             = 0 # No type
