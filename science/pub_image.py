@@ -16,7 +16,7 @@
 
 import rclpy
 from rclpy.node import Node
-
+import os
 from std_msgs.msg import String
 from science.msg import Science
 
@@ -31,25 +31,36 @@ class MinimalPublisher(Node):
         # file_found = False
 
     def timer_callback(self):
-        try:
-            file_path = "/home/rsx-science/rover_ws/src/rsx-science/science/hi.txt"
-            myfile = open (file_path, 'r')
-            myfile.close()
-            # file_found = True
-                
-        except FileNotFoundError:
+        # try:
+        file_path = "/home/rsx-science/rover_ws/src/rsx-science/science/test.txt"
+        if os.path.exists(file_path):
+            
             # def timer_callback(self):
-            # msg = String()
-            err_msg = 'txt NOT found'
-            # self.publisher_.publish(msg)
-            self.get_logger().info('Publishing: "%s"' % err_msg)
-
-        else:
-            # def timer_callback(self):
-            msg = String()
-            msg.data = 'txt found'
+            msg = Science()
+            print("hello there.")
+            with open('/home/rsx-science/rover_ws/src/rsx-science/science/image.jpg', 'rb') as img_file:
+                msg.image.data = img_file.read()
+                msg.image.format = "jpg"
+                # msg.image.header.stamp = self.get_clock().now()
+                msg.image.header.frame_id = "genie"
+                print("general kenobi")
             self.publisher_.publish(msg)
             self.get_logger().info('Publishing: "%s"' % msg.data)
+            os.remove(file_path)
+
+        else:
+            print("txt not found.")
+        #     myfile = open (file_path, 'r')
+        #     myfile.close()
+        #     # file_found = True
+                
+        # except FileNotFoundError:
+        #     # def timer_callback(self):
+        #     # msg = String()
+        #     err_msg = 'txt NOT found'
+        #     # self.publisher_.publish(msg)
+        #     self.get_logger().info('Publishing: "%s"' % err_msg)
+           
 
 
 
