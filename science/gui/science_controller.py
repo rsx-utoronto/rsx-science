@@ -63,12 +63,12 @@ class Controller(Node):
         self.get_logger().info('I heard you >:)')
 
         if self.state != "science":
-            self.get_logger().error('Not in Science state')
+            self.get_logger().debug('Not in Science state')
             # self.get_logger().debug("Not in Science state")
             return
 
         if 1 not in msg.buttons[:6]:
-            self.get_logger().info('No science buttons were pressed')
+            self.get_logger().debug('No science buttons were pressed')
             return
 
         button_x        = msg.buttons[0]
@@ -94,8 +94,6 @@ class Controller(Node):
         if button_o or button_x:
             data = int(max(button_x - button_o, 0))
             sci_pkt.peripheral  = sc.SCI_PERIPHERAL_ELECTROMAGNET 
-            sci_pkt.data = bytes([data, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for off
-            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
             # task = self.BUS.send(pulse)
 
         # elif button_x:
@@ -107,9 +105,6 @@ class Controller(Node):
         if button_triangle or button_square:
             data = int(max(button_square - button_triangle, 0))
             sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
-            sci_pkt.data = bytes([data, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for servo backward (close)
-            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
-            # task = self.BUS.send(pulse)
 
         # elif button_square:
         #     sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
@@ -126,9 +121,6 @@ class Controller(Node):
                 return
             
             sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO #TODO change drill
-            sci_pkt.data = bytes([data, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for servo backward (close)
-            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
-            # task = self.BUS.send(pulse)
 
         # elif button_R1:
         #     sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
@@ -138,16 +130,16 @@ class Controller(Node):
 
         if button_L2 or button_R2:
             data = max(button_R2 - button_L2, 0)
-
             sci_pkt.peripheral  = sc.SCI_PERIPHERAL_LINEAR_ACTUATOR
-            sci_pkt.data = bytes([0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for servo backward (close)
-            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
-            # task = self.BUS.send(pulse)
 
-        elif button_R2:
-            sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
-            sci_pkt.data = bytes([0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 1 for servo forward (open)
-            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
-            # task = self.BUS.send(pulse)
+        # elif button_R2:
+        #     sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
+        #     sci_pkt.data = bytes([0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 1 for servo forward (open)
+        #     pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
+        #     # task = self.BUS.send(pulse)
+
+        sci_pkt.data = bytes([data, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for off
+        pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
+        # task = self.BUS.send(pulse)
         
 
