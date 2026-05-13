@@ -60,7 +60,7 @@ class Controller(Node):
     
     def controller_callback(self, msg : Joy):
 
-        self.get_logger().info('I heard you >:)')
+        # self.get_logger().info('I heard you >:)')
 
         if self.state != "science":
             self.get_logger().debug('Not in Science state')
@@ -77,11 +77,11 @@ class Controller(Node):
         button_triangle = msg.buttons[2]
         button_square   = msg.buttons[3]
 
-        button_L2 = msg.buttons[6]
-        button_R2 = msg.buttons[7]
+        button_L2       = msg.buttons[6]
+        button_R2       = msg.buttons[7]
 
-        button_L1 = msg.buttons[4]
-        button_R1 = msg.buttons[5]
+        button_L1       = msg.buttons[4]
+        button_R1       = msg.buttons[5]
 
         sci_pkt                 = sc.ScienceCanPacket()
         sci_pkt.sender          = sc.SCI_MODULE_RPI
@@ -91,6 +91,7 @@ class Controller(Node):
         sci_pkt.extra           = sc.SCI_ERROR_SUCCESS
         sci_pkt.dlc             = 8
 
+        data = None
         if button_o or button_x:
             data = int(max(button_x - button_o, 0))
             sci_pkt.peripheral  = sc.SCI_PERIPHERAL_ELECTROMAGNET 
@@ -120,7 +121,7 @@ class Controller(Node):
                 self.get_logger().warn("Max Drill Speed")
                 return
             
-            sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO #TODO change drill
+            sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SPARK_MOTOR
 
         # elif button_R1:
         #     sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
@@ -129,7 +130,7 @@ class Controller(Node):
         #     # task = self.BUS.send(pulse)
 
         if button_L2 or button_R2:
-            data = max(button_R2 - button_L2, 0)
+            data = int(max(button_R2 - button_L2, 0))
             sci_pkt.peripheral  = sc.SCI_PERIPHERAL_LINEAR_ACTUATOR
 
         # elif button_R2:
@@ -138,8 +139,9 @@ class Controller(Node):
         #     pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
         #     # task = self.BUS.send(pulse)
 
-        sci_pkt.data = bytes([data, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for off
-        pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
-        # task = self.BUS.send(pulse)
+        if data not in range(-3, 4):
+            sci_pkt.data = bytes([(data & 0xFF), 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for off
+            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
+            task = self.BUS.send(pulse)
         
 
