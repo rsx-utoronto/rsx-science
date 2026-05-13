@@ -19,7 +19,7 @@ from rclpy.node import Node
 import comms.science_can as sc
 import numpy as np
 
-from science.msg import Science
+from science.msg import SCP
 from sensor_msgs.msg import Joy
 from std_msgs.msg import String
 
@@ -31,7 +31,8 @@ class Controller(Node):
             Joy,
             'joy', #TODO confirm the topic name
             self.controller_callback,
-            10)
+            10
+        )
 
         self.create_subscription(
             String,
@@ -41,10 +42,11 @@ class Controller(Node):
         )
 
         self.publisher = self.create_publisher(
-            Science,
-            "science_state", 
+            SCP,
+            "scp_send", 
             10
         )
+
         # self.test = True
         # timer_period = 0.5
         # self.timer = self.create_timer(timer_period, self.timer_callback, autostart= True)
@@ -57,6 +59,7 @@ class Controller(Node):
 
         self.state = None
         self.drill_speed = 0
+        self.scp = SCP()
     
     def controller_callback(self, msg : Joy):
 
@@ -83,18 +86,18 @@ class Controller(Node):
         button_L1       = msg.buttons[4]
         button_R1       = msg.buttons[5]
 
-        sci_pkt                 = sc.ScienceCanPacket()
-        sci_pkt.sender          = sc.SCI_MODULE_RPI
-        sci_pkt.receiver        = sc.SCI_MODULE_DRILL
-        sci_pkt.priority        = 0
-        sci_pkt.multipacket_id  = 0
-        sci_pkt.extra           = sc.SCI_ERROR_SUCCESS
-        sci_pkt.dlc             = 8
+        # sci_pkt                 = sc.ScienceCanPacket()
+        self.scp.sender         = sc.SCI_MODULE_RPI
+        self.scp.receiver       = sc.SCI_MODULE_DRILL
+        self.scp.priority       = 0
+        self.scp.multipacket_id = 0
+        self.scp.extra          = sc.SCI_ERROR_SUCCESS
+        self.scp.dlc            = 8
 
         data = None
         if button_o or button_x:
             data = int(max(button_x - button_o, 0))
-            sci_pkt.peripheral  = sc.SCI_PERIPHERAL_ELECTROMAGNET 
+            self.scp.peripheral = sc.SCI_PERIPHERAL_ELECTROMAGNET 
             # task = self.BUS.send(pulse)
 
         # elif button_x:
@@ -105,7 +108,7 @@ class Controller(Node):
 
         if button_triangle or button_square:
             data = int(max(button_square - button_triangle, 0))
-            sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
+            self.scp.peripheral = sc.SCI_PERIPHERAL_SERVO 
 
         # elif button_square:
         #     sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
@@ -121,7 +124,7 @@ class Controller(Node):
                 self.get_logger().warn("Max Drill Speed")
                 return
             
-            sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SPARK_MOTOR
+            self.scp.peripheral = sc.SCI_PERIPHERAL_SPARK_MOTOR
 
         # elif button_R1:
         #     sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
@@ -131,7 +134,7 @@ class Controller(Node):
 
         if button_L2 or button_R2:
             data = int(max(button_R2 - button_L2, 0))
-            sci_pkt.peripheral  = sc.SCI_PERIPHERAL_LINEAR_ACTUATOR
+            self.scp.peripheral = sc.SCI_PERIPHERAL_LINEAR_ACTUATOR
 
         # elif button_R2:
         #     sci_pkt.peripheral  = sc.SCI_PERIPHERAL_SERVO 
@@ -140,8 +143,10 @@ class Controller(Node):
         #     # task = self.BUS.send(pulse)
 
         if data not in range(-3, 4):
-            sci_pkt.data = bytes([(data & 0xFF), 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 0 for off
-            pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
-            task = self.BUS.send(pulse)
+            self.scp.data = [(data & 0xFF), 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF] # First byte set to 0 for off
+            self.publisher.publish(self.scp)
+            # pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
+            # task = self.BUS.send(pulse)
+
         
 

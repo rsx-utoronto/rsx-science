@@ -38,6 +38,7 @@ find_package(rosidl_default_generators REQUIRED)  # Replaces message_generation
 # Declare Custom Messages ==============================================
 set(msg_files
   "msg/Science.msg"
+  "msg/SCP.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
