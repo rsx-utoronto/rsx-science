@@ -72,7 +72,8 @@ install(PROGRAMS
     science/hello_science.py
     science/pub_image.py
     science/sub.py
-    science/gui/science_test.py
+    science/comms/science_gui.py
+    science/comms/science_controller.py
     DESTINATION lib/${PROJECT_NAME}
 )
 
