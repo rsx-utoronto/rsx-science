@@ -1,7 +1,3 @@
-//#define MPM_ENABLE
-#include <science_can.h>
-#include <circular_buffer.h>
-
 #include <science_can.h>
 #include <circular_buffer.h>
 
@@ -11,13 +7,13 @@
 // SCIENCE MODULE
 module_t CAN_MODULE = kModuleOptics;
 
-#define BLUE_LED_PIN      7
-#define UV_LED_PIN        8
-#define SERVO_PIN         9
+#define BLUE_LED_PIN          7
+#define UV_LED_PIN            8
+#define SERVO_PIN             9
 
 // Spectrometer Specific Pins
-#define SPEC_TRG              A0
-#define SPEC_ST               A1
+#define SPEC_ST               A0
+#define SPEC_TRG              A1
 #define SPEC_CLK              A2
 #define SPEC_VIDEO            A3
 
