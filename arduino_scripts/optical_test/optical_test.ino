@@ -1,7 +1,3 @@
-//#define MPM_ENABLE
-#include <science_can.h>
-#include <circular_buffer.h>
-
 #include <science_can.h>
 #include <circular_buffer.h>
 
@@ -16,8 +12,8 @@ module_t CAN_MODULE = kModuleOptics;
 #define SERVO_PIN         9
 
 // Spectrometer Specific Pins
-#define SPEC_TRG              A0
-#define SPEC_ST               A1
+#define SPEC_ST               A0
+#define SPEC_TRG              A1
 #define SPEC_CLK              A2
 #define SPEC_VIDEO            A3
 
@@ -277,7 +273,7 @@ void setup() {
 
   updateExpsrTime(expsrLev); //Lowest exposure time possible
 
-  Science::MPM::sample_extraction_buffer.base_ = reinterpret_cast<uint8_t>(data);
+  Science::MPM::sample_extraction_buffer.base_ = reinterpret_cast<uint8_t*>(data);
   Science::MPM::sample_extraction_buffer.len_ = SPEC_CHANNELS * 2;
   Science::MPM::sample_extraction_buffer.available = true;
 
