@@ -65,15 +65,21 @@ async def main():
     devices = await BleakScanner.discover()
 
     for d in devices:
-        if d.name == "Nano-Environemtal-Sensor":
+        # print(
+        #     f"Name: {d.name}\n",
+        #     f"Address: {d.address}\n",
+        #     # f"RSSI: {d.rssi}\n"
+        # )
+        if d.name == "Nano-Environmental-Sensor1" or d.name == "Nano-Environmental-Sensor2":
             print(d.address)
-            break
+            # break
 
 if __name__ == "__main__":
-    bme_address = "b0:b2:1c:49:ed:16"
+    bme_address1 = "B0:B2:1C:49:ED:16"
+    bme_address2 = "B0:B2:1C:4A:01:4E"
     try:
-        asyncio.run(connect_and_communicate(bme_address))
-        # asyncio.run(main())
+        # asyncio.run(connect_and_communicate(bme_address))
+        asyncio.run(main())
     except KeyboardInterrupt:
         print("\nScript stopped by user.")
 
