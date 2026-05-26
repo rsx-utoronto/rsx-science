@@ -61,11 +61,19 @@ async def connect_and_communicate(address):
     connected = False
     print("Disconnected.")
 
+async def main():
+    devices = await BleakScanner.discover()
+
+    for d in devices:
+        if d.name == "Nano-Environemtal-Sensor":
+            print(d.address)
+            break
 
 if __name__ == "__main__":
     bme_address = "b0:b2:1c:49:ed:16"
     try:
         asyncio.run(connect_and_communicate(bme_address))
+        # asyncio.run(main())
     except KeyboardInterrupt:
         print("\nScript stopped by user.")
 

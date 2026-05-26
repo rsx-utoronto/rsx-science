@@ -7,9 +7,9 @@
 // SCIENCE MODULE
 module_t CAN_MODULE = kModuleOptics;
 
-#define BLUE_LED_PIN      7
-#define UV_LED_PIN        8
-#define SERVO_PIN         9
+#define BLUE_LED_PIN          7
+#define UV_LED_PIN            8
+#define SERVO_PIN             9
 
 // Spectrometer Specific Pins
 #define SPEC_ST               A0
