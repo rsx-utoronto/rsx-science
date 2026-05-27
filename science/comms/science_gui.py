@@ -19,23 +19,28 @@ from rclpy.node import Node
 import science_can as sc
 import numpy as np
 
-from science.msg import Science
+from science.msg import Science, SCP
 
 
 class GUI(Node):
 
     def __init__(self):
         super().__init__('science_gui')
-        self.subscription = self.create_subscription(
+        self.create_subscription(
             Science,
             'science_state',
             self.listener_callback,
             10)
-        self.subscription  # prevent unused variable warning
 
-        self.publisher = self.create_publisher(
+        self.publisher_test = self.create_publisher(
             Science,
             "science_state", 
+            10
+        )
+
+        self.publisher = self.create_publisher(
+            SCP,
+            "scp_send", 
             10
         )
         self.test = True
@@ -60,7 +65,11 @@ class GUI(Node):
 
         # self.get_logger().info('I heard you >:)')
 
-        sci_pkt = sc.ScienceCanPacket()
+        sci_pkt = SCP()
+        sci_pkt.priority = 0 # 0 For high priority, 1 for low. Default is high 
+        sci_pkt.multipacket_id = 0 # Change if spectrometer data is requested
+        sci_pkt.extra = sc.SCI_NO_ERROR
+        sci_pkt.dlc = 8 # Full length of data 
 
         # Sender in this case will always be the RPi5
         sci_pkt.sender = sc.SCI_MODULE_RPI
@@ -73,45 +82,49 @@ class GUI(Node):
                 sci_pkt.peripheral = sc.SCI_PERIPHERAL_UVLED
             
             elif "blue_led" == msg.peripheral:
-                sci_pkt.peripheral = sc.SCI_PERIPHERAL_UVLED #TODO
+                sci_pkt.peripheral = sc.SCI_PERIPHERAL_BLUELED
             
             if "on" == msg.command:
-                sci_pkt.data = None #TODO
+                sci_pkt.data = [0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+                self.publisher.publish(sci_pkt)
             
             elif "off" == msg.command:
-                sci_pkt.data = None #TODO
+                sci_pkt.data = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+                self.publisher.publish(sci_pkt)
 
             if "spectrometer" == msg.peripheral:
-                sci_pkt.receiver = "spectrometer" #TODO
+                sci_pkt.peripheral = "spectrometer"
+                sci_pkt.data = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+                self.publisher.publish(sci_pkt)
 
-                if "start" == msg.command:
-                    # self.test = True
-                    # self.timer.reset()
-                    sci_pkt.data = None #TODO
+                # if "start" == msg.command:
+                #     # self.test = True
+                #     # self.timer.reset()
+                #     sci_pkt.data = None #TODO
                 
-                elif "stop" == msg.command:
-                    # self.test = False
-                    # self.timer.destroy()
-                    sci_pkt.data = None #TODO
+                # elif "stop" == msg.command:
+                #     # self.test = False
+                #     # self.timer.destroy()
+                #     sci_pkt.data = None #TODO
 
-        # Handling drill module specific commands
-        elif "drill" == msg.receiver:
-            sci_pkt.receiver = sc.SCI_MODULE_DRILL
+        # # Handling drill module specific commands
+        # elif "drill" == msg.receiver:
+        #     sci_pkt.receiver = sc.SCI_MODULE_DRILL
 
-            # Maybe not needed???
-            if "ultrasonic" == msg.peripheral:
-                sci_pkt.peripheral = sc.SCI_PERIPHERAL_ULTRASONIC
+        #     # Maybe not needed???
+        #     if "ultrasonic" == msg.peripheral:
+        #         sci_pkt.peripheral = sc.SCI_PERIPHERAL_ULTRASONIC
 
-                #TODO
+        #         #TODO
             
-            if "electromagnet" == msg.peripheral:
-                sci_pkt.peripheral = sc.SCI_PERIPHERAL_ELECTROMAGNET
+        #     if "electromagnet" == msg.peripheral:
+        #         sci_pkt.peripheral = sc.SCI_PERIPHERAL_ELECTROMAGNET
 
-                if "on" == msg.command:
-                    sci_pkt.data = None #TODO
+        #         if "on" == msg.command:
+        #             sci_pkt.data = None #TODO
                 
-                elif "off" == msg.command:
-                    sci_pkt.data = None #TODO
+        #         elif "off" == msg.command:
+        #             sci_pkt.data = None #TODO
 
 
         # Handling multispectral module specific commands
@@ -125,13 +138,13 @@ class GUI(Node):
                 sci_pkt.data = None #TODO
 
 
-        # Handling sorter module specific commands
-        elif "sorter" == msg.receiver:
-            sci_pkt.receiver = sc.SCI_MODULE_SORTER
+        # # Handling sorter module specific commands
+        # elif "sorter" == msg.receiver:
+        #     sci_pkt.receiver = sc.SCI_MODULE_SORTER
 
-        else:
-            self.get_logger().info('ERROR: Invalid receiver')
-            return
+        # else:
+        #     self.get_logger().info('ERROR: Invalid receiver')
+        #     return
         
         # Handling the servo peripheral commands (common to all modules) 
         if "servo" == msg.peripheral:
@@ -139,22 +152,17 @@ class GUI(Node):
 
             # Prepare CAN data packet for "servo" peripheral
             if "forward" == msg.command:
-                sci_pkt.priority = 0 # 0 For high priority, 1 for low. Can be default and placed outside of if statements. 
-                sci_pkt.multipacket_id = 0 # 0 for single packet commands. Should only be another number for spectrometer data. Can also be default
-                sci_pkt.extra = sc.SCI_ERROR_SUCCESS # No extra data to be sent with servo
-                sci_pkt.dlc = 8 # Full length of data 
-                sci_pkt.data = bytes([(0x00 + self.index), 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]) # First byte set to 1 for forward, -1 for backward.
-                pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt=sci_pkt)
+                sci_pkt.data = [0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF] # First byte set to 1 for forward, -1 for backward.
                 # task = self.BUS.send(pulse)
-                self.index += 1
-                self.index %= 20
 
             elif "backward" == msg.command:
-                sci_pkt.data = None #TODO
+                sci_pkt.data = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
             
             else:
                 self.get_logger().info('ERROR: Invalid command')
                 return
+            
+            self.publisher.publish(sci_pkt)
 
         print(msg.receiver)
         print(msg.peripheral)
@@ -164,15 +172,15 @@ class GUI(Node):
 
     def timer_callback(self):
         msg = Science()
-        msg.receiver = "drill"
-        msg.peripheral = "servo"
-        msg.command = "forward"
+        msg.receiver = "drill" #sc.SCI_MODULE_DRILL
+        msg.peripheral = "servo" #sc.SCI_PERIPHERAL_SERVO
+        # msg.command = "forward"
         # test_array = np.random.rand(2)
         # msg.data = test_array
         # msg.response = "site_2"
         
         if self.test:
-            self.publisher.publish(msg)
+            self.publisher_test.publish(msg)
 
         # print("Printing on topic")
     

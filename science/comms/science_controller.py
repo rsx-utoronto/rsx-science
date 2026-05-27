@@ -79,16 +79,16 @@ class Controller(Node):
             # self.get_logger().debug("Not in Science state")
             return
 
-        if self.prev_buttons == msg.buttons[:8]:
-                # print(self.prev_buttons)
-                self.prev_buttons = msg.buttons[:8]
-                # self.get_logger().debug('No science buttons were pressed')
-                return
-
         if self.start:
             self.prev_buttons = msg.buttons[:8]
             self.start = False
             return
+
+        if self.prev_buttons == msg.buttons[:8]:
+                # print(self.prev_buttons)
+                # self.prev_buttons = msg.buttons[:8]
+                # self.get_logger().debug('No science buttons were pressed')
+                return
 
         button_x        = msg.buttons[0]
         button_o        = msg.buttons[1]
@@ -174,7 +174,7 @@ class Controller(Node):
         #     pulse = sc.assemble_frame_from_SCP(rsx_sci_pkt= sci_pkt)
         #     # task = self.BUS.send(pulse)
 
-        print(data)
+        # print(data)
         self.prev_buttons = msg.buttons[:8]
 
         if data not in range(-3, 4):

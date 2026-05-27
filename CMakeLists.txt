@@ -75,6 +75,7 @@ install(PROGRAMS
     science/comms/ble_recv.py
     science/comms/science_gui.py
     science/comms/science_controller.py
+    science/comms/scienceCAN_send.py
     DESTINATION lib/${PROJECT_NAME}
 )
 
