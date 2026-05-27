@@ -45,7 +45,8 @@ class GUI(Node):
         )
         self.test = True
         timer_period = 0.5
-        self.timer = self.create_timer(timer_period, self.timer_callback, autostart= True)
+        # self.timer = self.create_timer(timer_period, self.timer_callback, autostart= True) #worked on jazzy
+        # self.timer = self.create_timer(timer_period, self.timer_callback) 
 
         # # Instantiate CAN bus
         # self.BUS = sc.initialize_bus()
