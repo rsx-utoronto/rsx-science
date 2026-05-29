@@ -10,7 +10,7 @@ module_t CAN_MODULE = kModuleMultispectral;
 #define SERVO_PIN 9
 
 // SERVO PARAMETERS
-Servo DrillServo;
+Servo MulSpecServo;
 const int initial_pos           = 90;
 int rel_pos                     = 0;
 
@@ -39,8 +39,8 @@ void setup() {
   // Serial.println("Servo attached!");
 
   // Set up Servo
-  DrillServo.attach(SERVO_PIN);
-  DrillServo.write(initial_pos);
+  MulSpecServo.attach(SERVO_PIN);
+  MulSpecServo.write(initial_pos);
   // Serial.print("Starting from servo pos: ");
   // Serial.println(initial_pos);
   delay(10);
@@ -86,7 +86,11 @@ void servo_step(int steps)
   Serial.print("Moving one step forward: ");
   Serial.println(goal_pos);
   
-  DrillServo.write(goal_pos);
+  MulSpecServo.write(goal_pos);
+  delay(1850);
+  MulSpecServo.write(initial_pos);
+  rel_pos = 0;
+
   delay (10); 
 }
 

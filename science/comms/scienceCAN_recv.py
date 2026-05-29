@@ -43,7 +43,7 @@ class CAN_recv(Node):
                 if RX_BUFFER == []:
                     continue
                 else:
-                    print(RX_BUFFER)
+                    # print(RX_BUFFER)
                     for msg in RX_BUFFER:
                         msg_received = msg
                         if type(msg_received) == list:
@@ -54,15 +54,6 @@ class CAN_recv(Node):
                             msg_received.print_processed_pkt()
 
                     RX_BUFFER.clear()
-        # can_msg = self.BUS.recv(timeout=0.0001)    # Instantly return None if CAN bus buffer is empty, or frame is captured as can_msg
-        
-        # if can_msg is not None:
-        #     try: 
-            # Store the SCP Packet from CAN Frame
-            # pulse_pkg = assemble_SCP_from_frame(can_frame=can_msg)
-
-            # Publish SCP Packet Message 
-            # self.publisher.publish(pulse_pkg)
 
             except Exception as e:
                 self.get_logger().error(f"Failed to assemble or read CAN bus: {e}")   

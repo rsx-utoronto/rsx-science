@@ -166,9 +166,9 @@ def multi_packet_manager(scp_msg):
 
 
     if cpy.extra == END_PACKET_CODE:
-        print_mpkt(MULTIPACKET_BUFFER[mid])
         RX_BUFFER.append(MULTIPACKET_BUFFER[mid])
-        MULTIPACKET_BUFFER.remove(MULTIPACKET_BUFFER[mid])
+        # MULTIPACKET_BUFFER.remove(MULTIPACKET_BUFFER[mid])
+        # MULTIPACKET_BUFFER
         free_available_slot(mid)
 
         return
@@ -183,7 +183,6 @@ def multi_packet_manager(scp_msg):
     #     MULTIPACKET_BUFFER[mid][index].data[i] = cpy.data[i]
 
     MULTIPACKET_BUFFER[mid][index] = cpy
-    print_mpkt(MULTIPACKET_BUFFER[mid])
 
 # Takes in a list of scp packets part of the same multipacket message and combines them
 def combine_multipacket_data(scp_list):
@@ -197,7 +196,19 @@ def combine_multipacket_data(scp_list):
         for num in inner_arr:
             res.append(num)
 
-    return res
+    hex_chunks = [res[i:i+2] for i in range(0, len(res), 2)]
+
+    final_res = []
+
+    for chunk in hex_chunks:
+        final_res.append(little_end_convert(chunk))
+
+    return final_res
+
+# Takes a hex pair and converts it to a singular number in little endian convention 
+def little_end_convert(hex_pair):
+    combined_num = hex_pair[1] << 8 | hex_pair[0]
+    return combined_num
 
 def assemble_SCP_from_frame(can_frame: can.Message):
     rsx_sci_pkt = ScienceCanPacket()
