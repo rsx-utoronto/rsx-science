@@ -70,12 +70,14 @@ install(DIRECTORY launch
 # Setup for Python Script ==============================================
 install(PROGRAMS
     science/hello_science.py
-    science/pub_image.py
+    science/genie_cam/pub_image.py
+    science/genie_cam/geniecam_publisher.py
     science/sub.py
     science/comms/ble_recv.py
     science/comms/science_gui.py
     science/comms/science_controller.py
     science/comms/scienceCAN_send.py
+    science/comms/scienceCAN_recv.py
     DESTINATION lib/${PROJECT_NAME}
 )
 
