@@ -25,17 +25,17 @@ class CAN_send(Node):
         self.BUS = initialize_bus(channel='can1')
 
         # Call process_tx periodically without blocking ROS callbacks
-        self.tx_timer = self.create_timer(0.01, self.process_tx_callback)
+        # self.tx_timer = self.create_timer(0.01, self.process_tx_callback)
 
     def ros_receiver_callback(self, msg: SCP):
-        print("in ros receiver can callback", flush=True)
+        # print("in ros receiver can callback", flush=True)
 
         sci_pkt = ScienceCanPacket()
 
         sci_pkt.priority       = msg.priority
         sci_pkt.receiver       = msg.receiver
         sci_pkt.multipacket_id = msg.multipacket_id
-        sci_pkt.peripheral     = msg.peripheral   # FIXED: you had msg.multipacket_id here
+        sci_pkt.peripheral     = msg.peripheral
         sci_pkt.extra          = msg.extra
         sci_pkt.data           = msg.data
         sci_pkt.dlc            = msg.dlc
@@ -44,14 +44,16 @@ class CAN_send(Node):
         # sci_pkt.sender = msg.sender
 
         TX_BUFFER.append(sci_pkt)
+        process_tx(self.BUS)
+
         sci_pkt.print_pkt()
 
-    def process_tx_callback(self):
-        process_tx(self.BUS)
+    # def process_tx_callback(self):
+    #     process_tx(self.BUS)
 
 
 def main(args=None):
-    print("Starting CAN Send Node", flush=True)
+    # print("Starting CAN Send Node", flush=True)
 
     rclpy.init(args=args)
 
