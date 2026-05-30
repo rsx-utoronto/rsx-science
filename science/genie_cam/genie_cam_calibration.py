@@ -42,17 +42,26 @@ def calibrate_images(
     dark_imgs = load_images(dark_folder)
     flat_imgs = load_images(flat_folder)
     cal_imgs = load_images(calibration_folder)
-    sample_imgs = load_images(sample_folder)
+    sample_imgs_raw = load_images(sample_folder)
+
+    # resizing
+    target_w, target_h = 2064, 1544
+    sample_imgs = []
+    for img in sample_imgs_raw:
+        if img.shape[1] != target_w or img.shape[0] != target_h:
+            img = cv2.resize(img, (target_w, target_h))
+        sample_imgs.append(img)
+    sample_imgs = np.stack(sample_imgs, axis=0)
 
     bias = mean_image(bias_imgs)
     dark_corr = mean_image(dark_imgs) - bias
     flat_corr = mean_image(flat_imgs) - dark_corr
     flat_norm = flat_corr / np.mean(flat_corr)
 
-    dark_corr = cv2.resize(dark_corr, (2064, 1544))
-    flat_norm = cv2.resize(flat_norm, (2064, 1544))
+    # Ensure calibration constants match the target size
+    dark_corr = cv2.resize(dark_corr, (target_w, target_h))
+    flat_norm = cv2.resize(flat_norm, (target_w, target_h))
     
-
     cal_corrected = (cal_imgs - dark_corr) / flat_norm
     sample_corrected = (sample_imgs - dark_corr) / flat_norm
 
@@ -101,7 +110,9 @@ def calibrate_images(
     # Calculate final reflectance
     reflectance = np.zeros_like(sample_corrected)
     for i in range(12):
-        reflectance[i] = sample_corrected[i] * M[i] + C[i]
+        val = sample_corrected[i] * M[i] + C[i]
+        # clip values to be between 0 and 1. FIX LATER WITH BETTER FORMULAS
+        reflectance[i] = np.clip(val, 0.0, 1.0)
     
     # reflectance_corr = np.divide(reflectance, flat_norm) # avoid double scaling
     reflectance_corr = reflectance
@@ -132,15 +143,14 @@ if __name__ == "__main__":
     dark_folder = "genie_calibration_data/dark"
     flat_folder = "genie_calibration_data/flat"
     calibration_folder = "calibration_photos2"
-    sample_folder = "calibration_photos2"
+    sample_folder = "sample_folder"
 
     serpentine_roi = (689, 630, 709, 653)
     chalk_roi = (776, 631, 796, 651)
     hematite_roi = (843, 630, 875, 652)
     magnetite_roi = (930, 632, 956, 652)
     chlorite_roi = (1012, 626, 1039, 652)
-
-    test_roi = magnetite_roi
+    test_roi = (0, 0, 10, 10)
 
     mean_reflectance = calibrate_images(
         bias_folder, dark_folder, flat_folder, calibration_folder, sample_folder, 
