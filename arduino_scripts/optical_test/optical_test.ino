@@ -210,6 +210,9 @@ void readSpectrometer(){
   maxVal = 0;
   for(int i = 0; i < SPEC_CHANNELS; i++){
       data[i] = analogRead(SPEC_VIDEO);
+      // Serial.print(i);
+      // Serial.print("; ");
+      // Serial.println(data[i]);
       if (data[i] > maxVal){
         maxVal = data[i];
       }
@@ -303,6 +306,7 @@ void loop() {
 
     for (int i = 0; i < recv_cnt; ++i){
       Science::ScienceCANMessage incoming_message = Science::rx_buffer.pop();
+      Serial.print(incoming_message.peripheral_);
 
       // Run peripheral specific command
       switch (incoming_message.peripheral_) {
@@ -320,11 +324,15 @@ void loop() {
 
         case kPeripheralSpectrometer:
           readSpectrometer();
+          // for (int i = 0; i < SPEC_CHANNELS; i++){
+            // data[i] = 0x0505;
+            // Serial.println(data[i]);
+          // }
           Science::MPM::queue_send = true;
           Science::MPM::frame = incoming_message.multipacket_id_;
           Science::MPM::recv = incoming_message.sender_;
+          break;
           
-
         default:
           Serial.println("Invalid peripheral for optical module");
           break;

@@ -8,6 +8,8 @@ module_t CAN_MODULE = kModuleDrill;
 #define ELECTROMAGNET_PIN         7
 #define LINEAR_ACTUATOR_POWER     8
 #define LINEAR_ACTUATOR_DIRECTION 9
+#define ULTRASONIC_TRIG           4
+#define ULTRASONIC_ECHO           2
 
 // SERVO PARAMETERS
 Servo DrillServo;
@@ -16,6 +18,10 @@ int rel_pos                     = 0; //added
 
 const int servo_backward        = 0; //added
 const int servo_forward         = 90; //added
+
+// ULTRASONIC PARAMETERS
+long duration;
+int distance;
 
 
 /* electromagnet_step()
@@ -147,6 +153,10 @@ void setup() {
   pinMode (ELECTROMAGNET_PIN, OUTPUT);
   digitalWrite(ELECTROMAGNET_PIN, LOW);
 
+  // Set Ultrasnoic Sensor pins
+  pinMode(ULTRASONIC_TRIG, OUTPUT); // Trig pin sends the pulse, so it is an Output
+  pinMode(ULTRASONIC_ECHO, INPUT);  // Echo pin receives the pulse, so it is an Input
+
   // Set up Servo
   DrillServo.attach(SERVO_PIN);
   DrillServo.write(initial_pos);
@@ -186,6 +196,45 @@ void loop() {
           break;
       }
     }
+
+  // 1. Clear the trigPin by pulling it LOW first
+  digitalWrite(ULRTASONIC_TRIG, LOW);
+  delayMicroseconds(2);
+
+  // 2. Trigger the sensor by sending a 10-microsecond HIGH pulse
+  digitalWrite(ULTRASONIC_TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ULTRASONIC_TRIG, LOW);
+
+  // 3. Read the echoPin. pulseIn() returns the sound wave travel time in microseconds
+  duration = pulseIn(ULTRASONIC_ECHO, HIGH);
+
+  // 4. Calculate the distance in centimeters
+  // Speed of sound is ~0.0343 cm/us. We divide by 2 because the wave travels to the object and back.
+  distance = duration * 0.0343 / 2;
+
+  Science::ScienceCANMessage send_back;
+  send_back.priority_ = 0x1;
+  send_back.multipacket_id_ = 0x0;
+  send_back.sender_ = kModuleDrill;
+  send_back.receiver_ = kModuleRPi;
+  send_back.peripheral_ = kPeripheralUltrasonic;
+  send_back.dlc_ = 4;
+  *((float*) (send_back.data_)) = distance; // Copy 32b float into 8b[4]
+  Science::tx_buffer.push(send_back);
+
+  while (!Science::rx_buffer.empty()) {
+    Science::ScienceCANMessage incoming_message = Science::rx_buffer.pop();
+    if (incoming_message.peripheral_ = kPeripheralUltrasonic) {
+
+    }
+  }
+
+  if (const int send_cnt = Science::process_tx()) {
+    Serial.print("Sent ");
+    Serial.print(send_cnt);
+    Serial.println(" Messages.");
+  }
 
     delay(10);
   }
