@@ -74,6 +74,7 @@ install(PROGRAMS
     science/genie_cam/geniecam_publisher.py
     science/sub.py
     science/comms/ble_recv.py
+    science/comms/eth_receiver.py
     science/comms/science_gui.py
     science/comms/science_controller.py
     science/comms/scienceCAN_send.py
