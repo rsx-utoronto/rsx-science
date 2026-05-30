@@ -45,9 +45,15 @@ class BLEOut:
         print(f"PROBES FOUND!!")
 
         # Connect to the ethernet receiver before starting BLE data loop
-        print(f"Connecting to receiver {RECEIVER_HOST}:{RECEIVER_PORT}...")
-        reader, writer = await asyncio.open_connection(RECEIVER_HOST, RECEIVER_PORT)
-        print("TCP connection established.\n")
+        while True:
+            try:
+                print(f"Connecting to receiver {RECEIVER_HOST}:{RECEIVER_PORT}...")
+                reader, writer = await asyncio.open_connection(RECEIVER_HOST, RECEIVER_PORT)
+                print("TCP connection established.\n")
+                break
+            except (ConnectionRefusedError, OSError) as e:
+                print(f"Connection failed: {e} — retrying in 5s...")
+                await asyncio.sleep(5)
 
         try:
             # Retrieve data from the found probes
