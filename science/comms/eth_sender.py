@@ -22,22 +22,6 @@ SENSORS = {
 }
 
 
-# def read_sensors() -> dict:
-#     data = {}
-#     for key, fn in SENSORS.items():
-#         try:
-#             data[key] = fn()
-#         except Exception:
-#             data[key] = None
-#     return data
-
-
-# def build_message(seq: int) -> str:
-#     sensors = read_sensors()
-#     parts = [f"seq={seq}"] + [f"{k}={v}" for k, v in sensors.items()]
-#     return " | ".join(parts)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Send data to laptop over ethernet.")
     parser.add_argument("--host", default=DEFAULT_HOST, help="Receiver IP (default: 192.168.0.123)")
