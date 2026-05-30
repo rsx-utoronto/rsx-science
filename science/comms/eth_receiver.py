@@ -12,13 +12,14 @@ import socket
 import time
 
 
-HOST = "192.168.0.34"
+HOST = "192.168.0.123"
+ALLOWED_CLIENT = "192.168.0.34"
 DEFAULT_PORT = 5005
 
 
 def main():
     parser = argparse.ArgumentParser(description="Receive data from Raspberry Pi over ethernet.")
-    parser.add_argument("--host", default=HOST, help="Local IP to bind (default: 192.168.0.34  )")
+    parser.add_argument("--host", default=HOST, help="Local IP to bind (default: 192.168.0.123)")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     args = parser.parse_args()
 
@@ -30,6 +31,10 @@ def main():
 
         while True:
             conn, addr = srv.accept()
+            if addr[0] != ALLOWED_CLIENT:
+                print(f"Rejected connection from {addr[0]}")
+                conn.close()
+                continue
             print(f"Connected: {addr[0]}:{addr[1]}\n")
             with conn:
                 buffer = ""
