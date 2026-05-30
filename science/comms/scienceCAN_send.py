@@ -30,6 +30,12 @@ class CAN_send(Node):
     def ros_receiver_callback(self, msg: SCP):
         # print("in ros receiver can callback", flush=True)
 
+        if msg.peripheral == SCI_PERIPHERAL_SPARK_MOTOR:
+            can_id = generate_can_id(dev_id= 0xC, api= CMD_API_SPD_SET)
+            velocity = msg.data[0] * 20 #TODO, change 20 to a valid number
+            data = pos_to_sparkdata(velocity)
+            send_can_message(can_id= id, data= data)
+
         sci_pkt = ScienceCanPacket()
 
         sci_pkt.priority       = msg.priority
